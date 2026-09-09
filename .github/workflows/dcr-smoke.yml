@@ -39,3 +39,4 @@ jobs:
           print('client_id=' + data['client_id'])
           print('token_endpoint_auth_method=' + str(data.get('token_endpoint_auth_method')))
           PY
+          # Triggered after final OAuth Server save to verify DCR persisted.

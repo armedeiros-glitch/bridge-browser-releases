@@ -1,0 +1,41 @@
+name: Publish Bridge Browser v0.10.0
+
+on:
+  push:
+    paths:
+      - '.github/workflows/publish-v010.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      SOURCE_URL: 'https://sdmntprbrazilsouth.oaiusercontent.com/files/00000000-447c-820e-a7d3-fa186c37c2cb/raw?se=2026-09-09T00%3A05%3A37Z&sp=r&sv=2026-02-06&sr=b&scid=a6a0ba96-743d-5dc2-b20d-720b1ecfb137&skoid=68f37fa7-4e08-478b-93f3-c72d563a0ab3&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-09-08T11%3A44%3A45Z&ske=2026-09-09T11%3A44%3A45Z&sks=b&skv=2026-02-06&sig=Vf0nFx62LysjH3dQZJaex8kgZaalwEVBYtSDvKh6Xh4%3D'
+      ZIP_SHA256: '4695a65806e068a6b43a7a3059b15027818395c3b9061467f922663e750f46c5'
+      EXE_SHA256: '2d8a443b18bb138dd1c03d70bc5a8843d4a2211b592808d80f34ba608fc67ca2'
+      ZIP_ASSET: 'Bridge-Browser-0.10.0-win-x64.zip'
+      EXE_ASSET: 'Bridge-Browser-Setup-0.10.0.exe'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch compiled Windows artifact
+        run: curl --fail --location --retry 3 "$SOURCE_URL" --output "$ZIP_ASSET"
+      - name: Verify package and installer
+        shell: bash
+        run: |
+          test "$(sha256sum "$ZIP_ASSET" | awk '{print $1}')" = "$ZIP_SHA256"
+          unzip -j "$ZIP_ASSET" '*.exe' -d extracted
+          exe="$(find extracted -maxdepth 1 -type f -name '*.exe' | head -n 1)"
+          test -n "$exe"
+          test "$(sha256sum "$exe" | awk '{print $1}')" = "$EXE_SHA256"
+          cp "$exe" "$EXE_ASSET"
+      - name: Publish binary-only GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create v0.10.0 "$ZIP_ASSET" "$EXE_ASSET" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title 'Bridge Browser v0.10.0' \
+            --notes 'UI polish release: removes the default Electron menu, simplifies the native window title, and shortens the connection status. EXE SHA-256: 2d8a443b18bb138dd1c03d70bc5a8843d4a2211b592808d80f34ba608fc67ca2'

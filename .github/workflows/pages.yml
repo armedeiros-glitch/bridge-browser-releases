@@ -1,10 +1,15 @@
-name: Deploy Bridge Connect Page
+name: Deploy Bridge Browser Site
 
 on:
   push:
     branches: [main]
     paths:
+      - index.html
       - connect.html
+      - privacy.html
+      - terms.html
+      - support.html
+      - bridge-icon.svg
       - .github/workflows/pages.yml
   workflow_dispatch:
 
@@ -31,8 +36,12 @@ jobs:
       - name: Prepare static site
         run: |
           mkdir -p _site
-          cp connect.html _site/index.html
+          cp index.html _site/index.html
           cp connect.html _site/connect.html
+          cp privacy.html _site/privacy.html
+          cp terms.html _site/terms.html
+          cp support.html _site/support.html
+          cp bridge-icon.svg _site/bridge-icon.svg
           touch _site/.nojekyll
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

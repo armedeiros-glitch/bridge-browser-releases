@@ -1,0 +1,35 @@
+name: Publish Bridge Browser v0.12.0
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-v0.12.0.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      ARTIFACT_URL: "https://sdmntprbrazilsouth.oaiusercontent.com/files/00000000-6770-820e-b1ca-b474bea62ea1/raw?se=2026-09-09T01%3A08%3A37Z&sp=r&sv=2026-02-06&sr=b&scid=693c006a-1576-5bc9-9d79-5fb6ac402336&skoid=68f37fa7-4e08-478b-93f3-c72d563a0ab3&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-09-08T09%3A41%3A36Z&ske=2026-09-09T09%3A41%3A36Z&sks=b&skv=2026-02-06&sig=tvNfrY0mNhowJkm%2B2L07%2Bx6/1/miN7%2BYx%2BAtDZLW1GA%3D"
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download verified private build artifact
+        run: |
+          curl -L --fail --retry 3 "$ARTIFACT_URL" -o Bridge-Browser-0.12.0-win-x64.zip
+          echo "0a4a3f0f77d918dbb6d0409e787fe3137ac929afa5ac84cec00b1df92d64ac92  Bridge-Browser-0.12.0-win-x64.zip" | sha256sum -c -
+      - name: Extract and verify installer
+        run: |
+          unzip -q Bridge-Browser-0.12.0-win-x64.zip
+          test -f Bridge-Browser-Setup-0.12.0.exe
+          echo "c4ec7b43fd9342ac80df964cb161cb3c88c50fac0ddef77c2c2df8eeb78be2b1  Bridge-Browser-Setup-0.12.0.exe" | sha256sum -c -
+      - name: Publish release
+        run: |
+          gh release create v0.12.0 \
+            --title "Bridge Browser v0.12.0" \
+            --notes "Secure Connect ChatGPT flow: opens the Bridge-owned account link page automatically, passes the one-time code outside server logs, and includes the OAuth-ready per-user MCP foundation. EXE SHA-256: c4ec7b43fd9342ac80df964cb161cb3c88c50fac0ddef77c2c2df8eeb78be2b1" \
+            Bridge-Browser-0.12.0-win-x64.zip \
+            Bridge-Browser-Setup-0.12.0.exe

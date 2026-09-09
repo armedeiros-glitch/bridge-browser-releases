@@ -6,6 +6,14 @@
 <meta name="color-scheme" content="dark">
 <title>Bridge Browser</title>
 <meta name="description" content="Bridge Browser is a minimal browser for delegated web execution. Your AI thinks; Bridge executes, with local user control.">
+<script>
+(function () {
+  const params = new URLSearchParams(window.location.search);
+  if (params.has('authorization_id')) {
+    window.location.replace('./connect.html' + window.location.search + window.location.hash);
+  }
+})();
+</script>
 <style>
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#07090f;color:#eef5ff;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}a{color:inherit;text-decoration:none}.wrap{width:min(1040px,calc(100% - 40px));margin:auto}.nav{height:72px;display:flex;align-items:center;justify-content:space-between}.brand{display:flex;align-items:center;gap:11px;font-weight:850}.logo{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:linear-gradient(145deg,#16d8ff,#1856ff 58%,#8b36ff);box-shadow:0 0 24px #167dff55}.links{display:flex;gap:20px;color:#93a4bb;font-size:13px}.hero{padding:100px 0 86px;text-align:center;background:radial-gradient(circle at 50% 0,#10285b 0,#0a0f1e 34%,#07090f 72%)}.eyebrow{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:#6fcaff;font-weight:850}.hero h1{font-size:clamp(42px,7vw,78px);line-height:.98;letter-spacing:-.055em;margin:16px auto 20px;max-width:900px}.hero p{max-width:680px;margin:0 auto;color:#91a3bb;font-size:18px;line-height:1.65}.pill{display:inline-flex;margin-top:30px;border:1px solid #2b3d61;background:#0d1422;border-radius:999px;padding:10px 14px;color:#b8c7db;font-size:12px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:70px 0}.card{border:1px solid #202c43;background:#0c111c;border-radius:18px;padding:24px}.card b{display:block;font-size:15px;margin-bottom:9px}.card p{margin:0;color:#8496ad;font-size:13px;line-height:1.6}.statement{padding:30px 0 90px;text-align:center}.statement h2{font-size:clamp(28px,4vw,48px);letter-spacing:-.035em;margin:0 0 16px}.statement p{max-width:700px;margin:auto;color:#8fa1b8;line-height:1.7}.footer{border-top:1px solid #151e2d;padding:28px 0 40px;color:#66788f;font-size:12px}.footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}.footer nav{display:flex;gap:18px}@media(max-width:760px){.links{display:none}.hero{padding-top:72px}.grid{grid-template-columns:1fr}.footer .wrap{flex-direction:column}}
 </style>

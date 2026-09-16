@@ -27,12 +27,15 @@ jobs:
           unzip -j installer.zip "$EXE_NAME" -d out
           echo "$EXE_SHA256  out/$EXE_NAME" | sha256sum -c -
           test "$(stat -c '%s' "out/$EXE_NAME")" = "$EXE_SIZE"
-      - name: Create release and upload installer
+      - name: Replace release asset with verified final build
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          gh release create v0.16.4 "out/$EXE_NAME" \
+          gh release upload v0.16.4 "out/$EXE_NAME" \
+            --repo "$GITHUB_REPOSITORY" \
+            --clobber
+          gh release edit v0.16.4 \
             --repo "$GITHUB_REPOSITORY" \
             --title "Bridge Browser v0.16.4" \
-            --notes "Fixes a zero-touch connectivity failure where a previously terminal command-result conflict could poison the local retry ledger and incorrectly force the Bridge into Reconnecting/Offline even while transport remained healthy. The server remains authoritative and other integrity conflicts remain fail-closed. Windows installer is unsigned."
+            --notes "Fixes a zero-touch connectivity failure where a previously terminal command-result conflict could poison the local retry ledger and incorrectly force the Bridge into Reconnecting/Offline even while transport remained healthy. The server remains authoritative and other integrity conflicts remain fail-closed. This asset is the verified final build from main commit f6cbe02f5a75dbcff0654aad3ba1f5e77f66c42d. Windows installer is unsigned."

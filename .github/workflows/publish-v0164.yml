@@ -1,0 +1,38 @@
+name: Publish Bridge Browser v0.16.4
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/publish-v0164.yml
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      ZIP_URL: 'https://sdmntprwestus3.oaiusercontent.com/files/00000000-b03c-81fd-9270-b8f6d4f5cd03/raw?se=2026-09-16T16%3A45%3A59Z&sp=r&sv=2026-02-06&sr=b&scid=904d9ff5-5374-560d-aedd-98c6da5f2292&skoid=68f37fa7-4e08-478b-93f3-c72d563a0ab3&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-09-16T13%3A50%3A58Z&ske=2026-09-17T13%3A50%3A58Z&sks=b&skv=2026-02-06&sig=%2Bjdi3g%2BZKRIecOJXqQwvj5sa5W3U/d4g3g43%2B/LUWMY%3D'
+      ZIP_SHA256: '4b5c12c69b00ece3e7f55736769f82c09895be34ebf8ffde90d88e7248a6c953'
+      EXE_SHA256: 'a87f00f5689bc167e13d6461d9d984d2e06750aa15282747a8e04d6535e7469e'
+      EXE_SIZE: '112527568'
+      EXE_NAME: 'Bridge-Browser-Setup-0.16.4.exe'
+    steps:
+      - name: Download verified Windows artifact
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 "$ZIP_URL" -o installer.zip
+          echo "$ZIP_SHA256  installer.zip" | sha256sum -c -
+          unzip -j installer.zip "$EXE_NAME" -d out
+          echo "$EXE_SHA256  out/$EXE_NAME" | sha256sum -c -
+          test "$(stat -c '%s' "out/$EXE_NAME")" = "$EXE_SIZE"
+      - name: Create release and upload installer
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release create v0.16.4 "out/$EXE_NAME" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Bridge Browser v0.16.4" \
+            --notes "Fixes a zero-touch connectivity failure where a previously terminal command-result conflict could poison the local retry ledger and incorrectly force the Bridge into Reconnecting/Offline even while transport remained healthy. The server remains authoritative and other integrity conflicts remain fail-closed. Windows installer is unsigned."

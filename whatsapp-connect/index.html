@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Conectar WhatsApp · EmbrasAI</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0b0b0d;--panel:#151517;--line:#302822;--text:#f7f4f1;--muted:#a59c94;--orange:#ff7a1a;--ok:#55d892;--bad:#ff8585}*{box-sizing:border-box}
+    body{margin:0;min-height:100vh;display:grid;place-items:center;background:radial-gradient(circle at 50% 0,#25150c 0,#0b0b0d 42%);font:14px Inter,system-ui,sans-serif;color:var(--text);padding:24px}
+    .card{width:min(540px,100%);background:rgba(21,21,23,.97);border:1px solid var(--line);border-radius:20px;padding:26px;box-shadow:0 24px 70px #0008}
+    .eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#ff9c58}.title{font-size:26px;font-weight:800;margin:6px 0 8px}.sub{color:var(--muted);line-height:1.55}
+    .safe{margin:18px 0;padding:12px 14px;border:1px solid #365541;border-radius:12px;background:#112019;color:#a6e6bf;font-size:12px;line-height:1.45}
+    .btn{width:100%;height:46px;border:0;border-radius:12px;background:var(--orange);color:#190f08;font-weight:800;cursor:pointer}.btn:disabled{opacity:.45;cursor:not-allowed}
+    .status{min-height:20px;margin-top:14px;color:var(--muted);line-height:1.45}.status.ok{color:var(--ok)}.status.bad{color:var(--bad)}.tiny{margin-top:14px;color:#766f69;font-size:11px;line-height:1.45}
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="eyebrow">EmbrasAI · WhatsApp</div>
+    <div class="title">Conectar WhatsApp Business</div>
+    <div class="sub">A Meta abrirá o Cadastro Incorporado para vincular o número mantendo o WhatsApp Business no celular.</div>
+    <div class="safe">Modo Coexistence ativo. O EmbrasAI <strong>não registra nem migra</strong> o número para API exclusiva. Se a Meta não confirmar que o número continua no app, a conexão é recusada.</div>
+    <button id="connect" class="btn" disabled>Carregando Meta…</button>
+    <div id="status" class="status">Preparando conexão segura…</div>
+    <div class="tiny">Configuração Meta 1331108422250286. O link temporário expira em 10 minutos.</div>
+  </main>
+  <script async defer crossorigin="anonymous" src="https://connect.facebook.net/pt_BR/sdk.js"></script>
+  <script>
+    const APP_ID='1619485929620930';
+    const CONFIG_ID='1331108422250286';
+    const state=new URLSearchParams(location.search).get('state')||'';
+    const ENDPOINT='https://aenmxjmrhancvqgpunhk.supabase.co/functions/v1/bridge-whatsapp-onboard?state='+encodeURIComponent(state);
+    const btn=document.getElementById('connect');
+    const statusEl=document.getElementById('status');
+    let authCode=null,sessionInfo=null,completing=false;
+    function status(message,kind=''){statusEl.textContent=message;statusEl.className='status'+(kind?' '+kind:'');}
+    function trustedMetaOrigin(origin){try{const h=new URL(origin).hostname.toLowerCase();return h==='facebook.com'||h.endsWith('.facebook.com');}catch{return false;}}
+    function normalizeMessage(raw){if(typeof raw==='string'){try{return JSON.parse(raw)}catch{return null}}return raw&&typeof raw==='object'?raw:null;}
+    async function completeIfReady(){
+      if(completing||!authCode||!sessionInfo?.waba_id||!sessionInfo?.phone_number_id)return;
+      completing=true;btn.disabled=true;
+      try{
+        const response=await fetch(ENDPOINT,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({action:'complete',code:authCode,waba_id:String(sessionInfo.waba_id),phone_number_id:String(sessionInfo.phone_number_id)})});
+        const body=await response.json().catch(()=>null);
+        if(!response.ok||!body?.ok)throw new Error(body?.error||'onboarding_failed');
+        status('WhatsApp conectado em Coexistence. Pode voltar ao EmbrasAI.','ok');btn.textContent='Conectado';
+      }catch(error){completing=false;btn.disabled=false;status('Não concluí a conexão: '+String(error?.message||error),'bad');}
+    }
+    window.fbAsyncInit=function(){
+      if(!state){status('Link inválido. Abra a conexão pelo EmbrasAI.','bad');return;}
+      FB.init({appId:APP_ID,cookie:true,xfbml:false,version:'v26.0'});
+      btn.disabled=false;btn.textContent='Conectar WhatsApp Business';status('Pronto para conectar.');
+    };
+    window.addEventListener('message',(event)=>{
+      if(!trustedMetaOrigin(event.origin))return;
+      const message=normalizeMessage(event.data);if(message?.type!=='WA_EMBEDDED_SIGNUP')return;
+      if(message.event==='FINISH'){sessionInfo=message.data||null;status('Autorização concluída. Validando Coexistence…');completeIfReady();}
+      else if(message.event==='CANCEL')status('Conexão cancelada antes de qualquer alteração.','bad');
+      else if(message.event==='ERROR')status('A Meta interrompeu o cadastro. Nenhuma migração foi executada.','bad');
+    });
+    btn.addEventListener('click',()=>{
+      if(typeof FB==='undefined'){status('SDK da Meta ainda está carregando…','bad');return;}
+      btn.disabled=true;status('Abrindo cadastro seguro da Meta…');
+      FB.login((response)=>{
+        btn.disabled=false;
+        if(response?.authResponse?.code){authCode=response.authResponse.code;status('Código recebido. Aguardando confirmação do número…');completeIfReady();}
+        else status('Login cancelado ou não autorizado. Nenhuma alteração foi feita.','bad');
+      },{config_id:CONFIG_ID,response_type:'code',override_default_response_type:true,extras:{setup:{},featureType:'whatsapp_business_app_onboarding',sessionInfoVersion:'3'}});
+    });
+  </script>
+</body>
+</html>

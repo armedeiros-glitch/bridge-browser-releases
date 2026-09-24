@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Conectar EmbrasAI</title>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:#0b0d10;color:#f5f7fa;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}.shell{width:min(520px,100%)}.brand{display:flex;align-items:center;gap:10px;margin:0 0 16px 4px;font-weight:800}.mark{width:32px;height:32px;border-radius:10px;border:1px solid #2a3441;background:#141a22;display:grid;place-items:center}.card{background:#12161c;border:1px solid #262d37;border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.38);overflow:hidden}.head{padding:24px 26px 19px;border-bottom:1px solid #232a33}.eyebrow{font-size:11px;color:#7f8b99;font-weight:800;text-transform:uppercase;letter-spacing:.11em}h1{font-size:23px;line-height:1.15;margin:8px 0 7px}.head p,.note{margin:0;color:#9aa5b1;font-size:13px;line-height:1.5}.body{padding:22px 26px 26px}.section{display:none}.section.show{display:block}.device{display:flex;align-items:center;gap:12px;padding:13px;border:1px solid #2d3540;border-radius:12px;background:#0e1217;margin-bottom:17px}.dot{width:9px;height:9px;border-radius:99px;background:#43d17b;box-shadow:0 0 10px rgba(67,209,123,.45)}.device-name{font-size:13px;font-weight:780}.device-meta{font-size:11px;color:#7f8994;margin-top:3px}.scopes{border-top:1px solid #252c35;border-bottom:1px solid #252c35;padding:13px 0;margin:16px 0 19px}.scope{display:flex;gap:9px;padding:6px 0;font-size:13px;color:#c2cbd4}.check{color:#6ee7a2;font-weight:900}.actions{display:flex;gap:10px}.actions button{flex:1;height:42px;border-radius:11px;border:1px solid #303946;background:#1a2028;color:#edf2f7;font-weight:760;cursor:pointer}.actions .allow{background:#0b5f35;border-color:#177747;color:#e6fff1}.actions button:disabled{opacity:.5;cursor:not-allowed}.notice{display:none;margin:0 0 15px;padding:11px 13px;border-radius:10px;font-size:13px;line-height:1.4;border:1px solid #653239;background:#211215;color:#ffb9c0}.notice.show{display:block}.spinner{width:28px;height:28px;margin:8px auto 14px;border:3px solid #26303c;border-top-color:#dce5ef;border-radius:50%;animation:s .8s linear infinite}@keyframes s{to{transform:rotate(360deg)}}.center{text-align:center}.foot{text-align:center;color:#626d79;font-size:11px;margin-top:14px}@media(max-width:520px){body{padding:14px}.head,.body{padding-left:20px;padding-right:20px}.actions{flex-direction:column}}
+</style>
+</head>
+<body>
+<main class="shell">
+<div class="brand"><div class="mark">◈</div><span>EmbrasAI</span></div>
+<section class="card">
+<header class="head"><div class="eyebrow">Conexão segura</div><h1 id="title">Conectando ao ChatGPT</h1><p id="subtitle">Preparando seu EmbrasAI automaticamente.</p></header>
+<div class="body">
+<div id="notice" class="notice"></div>
+<section id="loading" class="section show center"><div class="spinner"></div><p class="note">Isso leva só alguns instantes.</p></section><section id="consent" class="section">
+<div class="device"><span class="dot"></span><div><div id="deviceName" class="device-name">EmbrasAI</div><div id="deviceMeta" class="device-meta">Conectado</div></div></div>
+<p class="note"><strong id="clientName" style="color:#edf2f7">ChatGPT</strong> quer usar este EmbrasAI quando você pedir.</p>
+<div class="scopes"><div class="scope"><span class="check">✓</span><span>Ler e interagir com páginas quando você solicitar.</span></div><div class="scope"><span class="check">✓</span><span>Usar somente este EmbrasAI.</span></div><div class="scope"><span class="check">✓</span><span>Ações de consequência continuam protegidas pelas confirmações locais.</span></div><div id="scopeList"></div></div>
+<div class="actions"><button id="deny">Negar</button><button id="allow" class="allow">Permitir</button></div>
+</section>
+<section id="needsApp" class="section center"><p class="note">Abra o EmbrasAI e clique em <strong>Conectar ao ChatGPT</strong> para preparar este navegador automaticamente.</p></section>
+<div class="foot">O token local do navegador não é enviado ao ChatGPT.</div>
+</div></section></main>
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+const SUPABASE_URL='https://aenmxjmrhancvqgpunhk.supabase.co';
+const PUBLISHABLE_KEY='sb_publishable_UofCGoeTB-E3vJyWJXUepQ_U5Ka5tcM';
+const ACCOUNT_URL=SUPABASE_URL+'/functions/v1/bridge-browser-account';
+const CHATGPT_URL='https://chatgpt.com/';
+const supabase=createClient(SUPABASE_URL,PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const q=new URLSearchParams(location.search),hash=new URLSearchParams(location.hash.replace(/^#/,''));
+const authorizationId=q.get('authorization_id');
+const deviceTokenHash=hash.get('device_token')||'';
+const $=id=>document.getElementById(id);
+const show=id=>document.querySelectorAll('.section').forEach(x=>x.classList.toggle('show',x.id===id));
+const fail=message=>{$('notice').textContent=message;$('notice').classList.add('show');show('needsApp');};
+async function session(){const {data}=await supabase.auth.getSession();return data.session;}
+async function account(accessToken){const r=await fetch(ACCOUNT_URL,{headers:{authorization:'Bearer '+accessToken}});if(!r.ok)throw new Error('Não foi possível validar o EmbrasAI.');return r.json();}async function bootstrap(){
+  if(deviceTokenHash){const {error}=await supabase.auth.verifyOtp({token_hash:deviceTokenHash,type:'email'});if(error)throw new Error('A conexão automática expirou. Volte ao EmbrasAI e tente novamente.');history.replaceState(null,'',location.pathname+location.search);}
+  const s=await session();
+  if(!s){$('title').textContent='Abra o EmbrasAI';$('subtitle').textContent='A conexão é preparada pelo aplicativo, sem conta adicional.';show('needsApp');return;}
+  const a=await account(s.access_token);if(!a.linked||!Array.isArray(a.devices)||!a.devices.length)throw new Error('Nenhum EmbrasAI está vinculado a esta sessão.');
+  const d=a.devices.find(x=>x.is_default)||a.devices[0];$('deviceName').textContent=d.display_name||'EmbrasAI';$('deviceMeta').textContent=[d.online?'Online':'Offline',d.app_version?'v'+d.app_version:''].filter(Boolean).join(' · ');
+  if(!authorizationId){location.replace(CHATGPT_URL);return;}
+  const {data,error}=await supabase.auth.oauth.getAuthorizationDetails(authorizationId);if(error)throw error;if(data&&!('authorization_id' in data)&&data.redirect_url){location.assign(data.redirect_url);return;}
+  $('title').textContent='Permitir conexão?';$('subtitle').textContent='O ChatGPT está pedindo acesso a este EmbrasAI.';$('clientName').textContent=data?.client?.name||'ChatGPT';$('scopeList').replaceChildren();
+  for(const scope of String(data?.scope||'').split(/\s+/).filter(Boolean)){if(['openid','email','profile'].includes(scope))continue;const row=document.createElement('div');row.className='scope';const check=document.createElement('span');check.className='check';check.textContent='✓';const copy=document.createElement('span');copy.textContent='Permissão solicitada: '+scope;row.append(check,copy);$('scopeList').append(row);}show('consent');
+}
+$('allow').onclick=async()=>{const b=$('allow');b.disabled=true;b.textContent='Permitindo…';const {data,error}=await supabase.auth.oauth.approveAuthorization(authorizationId);if(error){b.disabled=false;b.textContent='Permitir';return fail(error.message)}location.assign(data.redirect_url)};
+$('deny').onclick=async()=>{const b=$('deny');b.disabled=true;const {data,error}=await supabase.auth.oauth.denyAuthorization(authorizationId);if(error){b.disabled=false;return fail(error.message)}location.assign(data.redirect_url)};
+bootstrap().catch(e=>fail(e?.message||String(e)));
+</script>
+</body>
+</html>

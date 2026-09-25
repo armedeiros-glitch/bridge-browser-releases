@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>EmbrasAI · Conectar Meta</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% 0,#171c25 0,#090b0e 46%);color:#f3f6f9;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;display:grid;place-items:center;padding:24px}
+    .shell{width:min(520px,100%)}.brand{font-weight:850;letter-spacing:-.03em;margin:0 0 14px 3px;color:#e7edf3}.card{background:#12161b;border:1px solid #2a313a;border-radius:20px;overflow:hidden;box-shadow:0 28px 80px rgba(0,0,0,.42)}
+    .head{padding:27px 28px 21px;border-bottom:1px solid #252c34}.eyebrow{font-size:11px;color:#7f8b97;text-transform:uppercase;font-weight:800;letter-spacing:.12em}.head h1{font-size:27px;margin:8px 0 7px;letter-spacing:-.04em}.head p{margin:0;color:#9aa5af;font-size:14px;line-height:1.5}.body{padding:24px 28px 28px}
+    .notice{display:none;padding:12px 13px;border-radius:11px;margin-bottom:15px;font-size:13px;line-height:1.45;border:1px solid #3b4551;background:#151b21;color:#cbd3db}.notice.show{display:block}.notice.error{border-color:#6d343b;background:#241216;color:#ffc0c6}.session{font-size:12px;color:#7f8b97;margin-bottom:17px}.ok{color:#75d99e;font-weight:800}
+    .simple{padding:14px 15px;border:1px solid #29313a;border-radius:12px;background:#0e1216;color:#aeb8c2;font-size:13px;line-height:1.55;margin-bottom:17px}.simple strong{color:#eef2f6}
+    button{width:100%;height:48px;border:0;border-radius:12px;background:#1877f2;color:#fff;font:inherit;font-weight:850;cursor:pointer;box-shadow:0 8px 24px rgba(24,119,242,.2)}button:hover{filter:brightness(1.06)}button:disabled{opacity:.45;cursor:not-allowed}.hint{margin:14px 0 0;color:#717c87;font-size:11px;line-height:1.5;text-align:center}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <div class="brand">EmbrasAI</div>
+    <section class="card">
+      <header class="head"><div class="eyebrow">Performance Brain</div><h1>Conectar Meta</h1><p>Entre com o Facebook e pronto. O EmbrasAI configura o restante por você.</p></header>
+      <div class="body">
+        <div id="notice" class="notice"></div>
+        <div id="session" class="session">Verificando sua sessão…</div>
+        <div class="simple"><strong>Sem token, sem configuração manual.</strong><br>A Meta abrirá a tela oficial de login e autorização. Nesta fase o Performance Brain usa somente leitura.</div>
+        <button id="connect" disabled>Continuar com Facebook</button>
+        <p class="hint">O EmbrasAI guarda a credencial no Vault. Nenhuma campanha é alterada durante a conexão.</p>
+      </div>
+    </section>
+  </main>
+<script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+  const SUPABASE_URL = 'https://aenmxjmrhancvqgpunhk.supabase.co';
+  const PUBLISHABLE_KEY = 'sb_publishable_UofCGoeTB-E3vJyWJXUepQ_U5Ka5tcM';
+  const OAUTH_URL = SUPABASE_URL + '/functions/v1/embrasai-meta-oauth';
+  const supabase = createClient(SUPABASE_URL, PUBLISHABLE_KEY, { auth: { persistSession:true, autoRefreshToken:true, detectSessionInUrl:true } });
+  const notice = document.getElementById('notice');
+  const sessionLine = document.getElementById('session');
+  const connect = document.getElementById('connect');
+  let session = null;
+  function show(message, kind='') { notice.textContent = message || ''; notice.className = 'notice' + (message ? ' show' : '') + (kind ? ' ' + kind : ''); }
+  function busy(on) { connect.disabled = on || !session; connect.textContent = on ? 'Abrindo Facebook…' : 'Continuar com Facebook'; }
+  async function bootstrap() {
+    const { data } = await supabase.auth.getSession();
+    session = data.session;
+    if (!session?.access_token) {
+      sessionLine.textContent = 'Sessão do EmbrasAI não encontrada neste navegador.';
+      show('Faça login no EmbrasAI e abra esta tela novamente.', 'error');
+      return;
+    }
+    sessionLine.innerHTML = '<span class="ok">Sessão ativa</span> · ' + (session.user?.email || 'EmbrasAI');
+    connect.disabled = false;
+  }
+  connect.addEventListener('click', async () => {
+    busy(true); show('');
+    try {
+      const response = await fetch(OAUTH_URL, { method:'POST', headers:{ 'content-type':'application/json', 'authorization':'Bearer ' + session.access_token }, body:JSON.stringify({ source_alias:'planet-meta' }) });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result?.url) throw new Error(result?.error || 'Não consegui iniciar o login da Meta.');
+      location.assign(result.url);
+    } catch (error) {
+      show(error?.message || 'Não consegui abrir o Facebook.', 'error');
+      busy(false);
+    }
+  });
+  bootstrap();
+</script>
+</body>
+</html>

@@ -11,6 +11,7 @@ on:
       - support.html
       - bridge-icon.svg
       - whatsapp-connect/**
+      - meta-connect/**
       - oauth/**
       - .github/workflows/pages.yml
   workflow_dispatch:
@@ -37,7 +38,7 @@ jobs:
         uses: actions/configure-pages@v5
       - name: Prepare static site
         run: |
-          mkdir -p _site/whatsapp-connect _site/oauth/consent
+          mkdir -p _site/whatsapp-connect _site/meta-connect _site/oauth/consent
           cp index.html _site/index.html
           cp connect.html _site/connect.html
           cp privacy.html _site/privacy.html
@@ -45,6 +46,7 @@ jobs:
           cp support.html _site/support.html
           cp bridge-icon.svg _site/bridge-icon.svg
           cp whatsapp-connect/index.html _site/whatsapp-connect/index.html
+          cp meta-connect/index.html _site/meta-connect/index.html
           cp oauth/consent/index.html _site/oauth/consent/index.html
           touch _site/.nojekyll
       - name: Upload Pages artifact

@@ -55,7 +55,7 @@ async function bootstrap(){
   if(deviceTokenHash){const {error}=await supabase.auth.verifyOtp({token_hash:deviceTokenHash,type:'email'});if(error)throw new Error('A conexão automática expirou. Volte ao EmbrasAI e tente novamente.');history.replaceState(null,'',location.pathname+location.search);}
   const s=await session();
   if(!s){$('title').textContent='Entrar no EmbrasAI';$('subtitle').textContent='Use as credenciais fornecidas para concluir a autorização.';show('login');return;}
-  const a=await account(s.access_token);if(!a.linked||!Array.isArray(a.devices)||!a.devices.length){await supabase.auth.signOut();$('title').textContent='Entrar no EmbrasAI';$('subtitle').textContent='Use uma conta vinculada a um EmbrasAI.';fail('Esta conta não possui um EmbrasAI vinculado.','login');return;}
+  const a=await account(s.access_token);if(!a.linked||!Array.isArray(a.devices)||!a.devices.length){await supabase.auth.signOut({ scope: 'local' });$('title').textContent='Entrar no EmbrasAI';$('subtitle').textContent='Use uma conta vinculada a um EmbrasAI.';fail('Esta conta não possui um EmbrasAI vinculado.','login');return;}
   const d=a.devices.find(x=>x.is_default)||a.devices[0];$('deviceName').textContent=d.display_name||'EmbrasAI';$('deviceMeta').textContent=[d.online?'Online':'Offline',d.app_version?'v'+d.app_version:''].filter(Boolean).join(' · ');
   if(!authorizationId){$('title').textContent='Conexão não iniciada';$('subtitle').textContent='Volte à sua IA e inicie a conexão com o EmbrasAI.';show('needsApp');return;}
   const {data,error}=await supabase.auth.oauth.getAuthorizationDetails(authorizationId);if(error)throw error;if(data&&!('authorization_id' in data)&&data.redirect_url){location.assign(data.redirect_url);return;}
@@ -65,7 +65,7 @@ async function bootstrap(){
 }
 $('signIn').onclick=async()=>{clearNotice();const b=$('signIn');const email=$('email').value.trim();const password=$('password').value;if(!email||!password)return fail('Informe e-mail e senha.','login');b.disabled=true;b.textContent='Entrando…';const {error}=await supabase.auth.signInWithPassword({email,password});if(error){b.disabled=false;b.textContent='Entrar';$('password').value='';return fail('E-mail ou senha inválidos.','login')}b.textContent='Entrar';$('password').value='';await bootstrap().catch(e=>fail(e?.message||String(e),'login'));};
 $('password').addEventListener('keydown',e=>{if(e.key==='Enter')$('signIn').click()});
-$('switchAccount').onclick=async()=>{clearNotice();await supabase.auth.signOut();$('title').textContent='Entrar no EmbrasAI';$('subtitle').textContent='Use as credenciais fornecidas para concluir a autorização.';show('login');};
+$('switchAccount').onclick=async()=>{clearNotice();await supabase.auth.signOut({ scope: 'local' });$('title').textContent='Entrar no EmbrasAI';$('subtitle').textContent='Use as credenciais fornecidas para concluir a autorização.';show('login');};
 $('allow').onclick=async()=>{const b=$('allow');b.disabled=true;b.textContent='Permitindo…';const {data,error}=await supabase.auth.oauth.approveAuthorization(authorizationId);if(error){b.disabled=false;b.textContent='Permitir';return fail(error.message)}location.assign(data.redirect_url)};
 $('deny').onclick=async()=>{const b=$('deny');b.disabled=true;const {data,error}=await supabase.auth.oauth.denyAuthorization(authorizationId);if(error){b.disabled=false;return fail(error.message)}location.assign(data.redirect_url)};
 bootstrap().catch(e=>fail(e?.message||String(e)));

@@ -89,8 +89,7 @@ async function socialSignIn(provider){
     const {data,error}=await supabase.auth.signInWithOAuth({provider,options:{redirectTo:socialReturnUrl()}});
     if(error)throw error;
     if(!data?.url)throw new Error('oauth_redirect_missing');
-    // Supabase JS normally redirects on its own. This branch handles manual redirects.
-    location.assign(data.url);
+    // supabase-js handles the browser redirect; do not navigate a second time.
   }catch(_error){
     fail('Não foi possível entrar com '+(provider==='google'?'Google':'Apple')+'. Tente novamente ou escolha outra forma de entrar.','login');
     b.disabled=false;

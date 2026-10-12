@@ -19,11 +19,19 @@ section[hidden]{display:none!important}
 <main><div class="brand">◈ EMBRAS<span>AI</span></div><div class="card">
 <h1 id="heading">Conectar computador</h1><p id="subtitle">Autorize este computador na sua conta EmbrasAI.</p>
 <section id="login" hidden>
-<label for="email">E-mail da conta EmbrasAI</label><input id="email" type="email" autocomplete="username">
-<button id="magic">Enviar link de acesso</button>
-<button id="toggle" class="secondary">Entrar com senha</button>
-<div id="passwordGroup" hidden><label for="password">Senha</label><input id="password" type="password" autocomplete="current-password">
-<button id="signIn">Entrar</button></div>
+<p>O código do notebook já veio pelo link. Entre na conta EmbrasAI para autorizar o computador.</p>
+<label>Código de pareamento (não é e-mail)</label>
+<div id="loginCode" class="code">Aguardando código</div>
+<label for="email">E-mail usado na sua conta EmbrasAI</label>
+<input id="email" type="email" inputmode="email" autocomplete="username" placeholder="seuemail@exemplo.com">
+<label for="password">Senha da conta EmbrasAI</label>
+<input id="password" type="password" autocomplete="current-password" placeholder="Sua senha">
+<button id="signIn">Entrar e continuar</button>
+<button id="toggle" class="secondary">Outra forma de entrar (link por e-mail)</button>
+<div id="emailLinkGroup" hidden>
+<p class="muted">Somente se você não usa senha. O link é enviado para o e-mail da sua conta, não para o código do notebook.</p>
+<button id="magic" class="secondary">Enviar link para meu e-mail</button>
+</div>
 </section>
 <section id="confirm" hidden>
 <div id="codeDisplay" class="code"></div>
@@ -58,15 +66,21 @@ const validPairCode=()=>validCode(code.slice(0,4)+'-'+code.slice(4));
 async function showNext(){
  const {data:{session}}=await supabase.auth.getSession();
  if(location.search||location.hash)history.replaceState(null,'',location.origin+location.pathname);
- if(!session){setView('login');$('heading').textContent='Entre na sua conta';return;}
+ if(!session){
+  $('loginCode').textContent=validPairCode()?code.slice(0,4)+'-'+code.slice(4):'Informe o código após entrar';
+  if(normalize($('email').value)===code)$('email').value='';
+  $('emailLinkGroup').hidden=true;
+  setView('login');$('heading').textContent='Entre na sua conta';return;
+ }
  if(!validPairCode()){setView('manual');$('heading').textContent='Código do computador';return;}
  $('heading').textContent='Autorizar computador?';
  $('codeDisplay').textContent=code.slice(0,4)+'-'+code.slice(4);
  setView('confirm');
 }
-$('toggle').onclick=()=>{$('passwordGroup').hidden=!$('passwordGroup').hidden};
+$('toggle').onclick=()=>{$('emailLinkGroup').hidden=!$('emailLinkGroup').hidden;notice('');};
 $('magic').onclick=async()=>{
- const email=$('email').value.trim();if(!email)return notice('Informe seu e-mail.');
+ const email=$('email').value.trim();
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return notice('Digite o e-mail da sua conta, não o código do notebook.');
  const b=$('magic');b.disabled=true;
  const redirect=new URL(location.origin+location.pathname);
  if(validPairCode())redirect.searchParams.set('pair_code',code.slice(0,4)+'-'+code.slice(4));
@@ -74,8 +88,11 @@ $('magic').onclick=async()=>{
  b.disabled=false;notice(error?'Não foi possível enviar o link.':'Verifique o e-mail e confirme o login neste navegador.');
 };
 $('signIn').onclick=async()=>{
- const b=$('signIn');b.disabled=true;
- const {error}=await supabase.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});
+ const email=$('email').value.trim(), password=$('password').value;
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return notice('Digite o e-mail da conta EmbrasAI. O código do notebook já está acima.');
+ if(!password)return notice('Informe a senha da sua conta EmbrasAI.');
+ const b=$('signIn');b.disabled=true;notice('');
+ const {error}=await supabase.auth.signInWithPassword({email,password});
  $('password').value='';b.disabled=false;
  if(error)notice('E-mail ou senha não conferem.');
  else await showNext();

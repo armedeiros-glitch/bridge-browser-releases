@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="referrer" content="no-referrer">
+<title>EmbrasAI | Autorizar Meta</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(ellipse at 50% 0,#25201d 0,#0b0d11 58%);color:#f7f7f8;font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{width:min(480px,100%)}.brand{font-size:17px;font-weight:850;letter-spacing:-.04em;margin:0 0 16px}
+.card{border:1px solid #33343b;border-radius:18px;background:#14161b;box-shadow:0 22px 68px #0008;overflow:hidden}
+header{padding:27px 25px 22px;border-bottom:1px solid #2e3036}
+small{display:block;font-size:11px;color:#ec9b4c;text-transform:uppercase;letter-spacing:.12em;font-weight:800}
+h1{font-size:26px;letter-spacing:-.045em;line-height:1.15;margin:10px 0}
+.sub{color:#a3a7ae;font-size:13px;margin:0}.body{padding:23px 25px}
+.account{border:1px solid #3c3a38;background:#1b1b1d;padding:13px 15px;border-radius:12px;margin-bottom:15px}
+.account strong{display:block;font-size:16px}.account span{display:block;color:#b5ac9f;font-size:12px;margin-top:3px}
+.note{font-size:13px;color:#bdc1c9;line-height:1.55;margin-bottom:18px}
+.state{font-size:12px;color:#bfc4cc;margin-bottom:16px}
+.ok{color:#85d6a4}.error{color:#ffb7b9}
+label{font-size:12px;color:#aeb4bc;font-weight:700;display:block;margin:12px 0 6px}
+input{width:100%;height:46px;background:#0e1116;border:1px solid #42454d;border-radius:10px;color:#fff;font:inherit;padding:0 12px}
+input:focus{outline:2px solid #ed8c36;outline-offset:2px}
+button{display:block;width:100%;margin-top:12px;background:#ed8c36;border:0;border-radius:11px;color:#16100b;font:inherit;font-weight:800;min-height:46px;cursor:pointer}
+button:disabled{opacity:.48;cursor:not-allowed}
+button.secondary{background:transparent;border:1px solid #47494f;color:#ecedf0}
+button.ghost{background:transparent;color:#bbc1ca;font-size:12px;min-height:31px;margin-top:12px}
+.msg{white-space:pre-wrap;background:#20191c;color:#ffc2c4;border:1px solid #693944;padding:12px;border-radius:9px;font-size:13px;margin:12px 0}
+.msg.good{background:#13241c;color:#b8f1cf;border-color:#2e694b}
+[hidden]{display:none!important}
+footer{text-align:center;color:#7e858f;font-size:11px;margin-top:17px}
+</style>
+</head>
+<body>
+<main>
+  <div class="brand">EmbrasAI <span style="color:#ef8d36">✦</span></div>
+  <section class="card">
+    <header>
+      <small>Permissão individual</small>
+      <h1>Autorizar Meta</h1>
+      <p class="sub">Conecte sua conta pelo Facebook sem precisar estar no computador.</p>
+    </header>
+    <div class="body">
+      <div class="account"><strong>Planet Chocolate | Villagio Caxias</strong><span>Somente a conta escolhida para esta autorização</span></div>
+      <div class="note">Esta solicitação pede acesso de leitura e gerenciamento de anúncios à Meta. <strong>Nenhum anúncio ou orçamento será alterado</strong> nesta etapa. As outras contas permanecem intactas.</div>
+      <div class="state" id="state" aria-live="polite">Verificando o acesso ao EmbrasAI…</div>
+      <div class="msg" id="msg" hidden role="status"></div>
+      <section id="login" hidden>
+        <label for="email">E-mail da sua conta EmbrasAI</label>
+        <input id="email" type="email" autocomplete="email" inputmode="email" placeholder="voce@exemplo.com">
+        <button id="magic" type="button" class="secondary">Receber link de acesso por e-mail</button>
+        <label for="password">Ou entrar com senha do EmbrasAI</label>
+        <input id="password" type="password" autocomplete="current-password" placeholder="Sua senha">
+        <button id="signin" type="button">Entrar</button>
+      </section>
+      <section id="ready" hidden>
+        <button id="authorize" type="button">Continuar para o Facebook</button>
+        <button id="logout" type="button" class="ghost">Trocar conta do EmbrasAI</button>
+      </section>
+    </div>
+  </section>
+  <footer>Somente login oficial da Meta. O EmbrasAI não recebe sua senha do Facebook.</footer>
+</main>
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+const SUPABASE_URL='https://aenmxjmrhancvqgpunhk.supabase.co';
+const PUBLISHABLE_KEY='sb_publishable_UofCGoeTB-E3vJyWJXUepQ_U5Ka5tcM';
+const endpoint=SUPABASE_URL+'/functions/v1/embrasai-meta-oauth';
+const supabase=createClient(SUPABASE_URL,PUBLISHABLE_KEY,{
+ auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+});
+const $=id=>document.getElementById(id);
+const params=new URLSearchParams(location.search);
+const accountId=params.get('account')||'';
+const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const EXPECTED_CAXIAS='cf11486a-e27c-43f1-b797-bd1c175e7490';
+let session=null;
+let busy=false;
+function message(text='',kind=''){
+ $('msg').hidden=!text;$('msg').textContent=text;
+ $('msg').className='msg'+(kind==='good'?' good':'');
+}
+function setBusy(value){
+ busy=value;
+ for(const name of ['magic','signin','authorize','logout'])$(name).disabled=value;
+}
+async function refresh(){
+ // This pilot page is intentionally scoped to Villagio Caxias.
+ if(!UUID.test(accountId)||accountId.toLowerCase()!==EXPECTED_CAXIAS){
+  $('login').hidden=true;$('ready').hidden=true;
+  $('state').textContent='Link incompleto ou conta incorreta.';
+  message('Use o link de autorização específico da conta Villagio Caxias.');return;
+ }
+ const {data,error}=await supabase.auth.getSession();
+ if(error)throw error;
+ session=data?.session||null;
+ $('login').hidden=!!session;
+ $('ready').hidden=!session;
+ $('state').textContent=session ? '✓ Conta EmbrasAI conectada. Autorize abaixo.' : 'Entre na sua conta EmbrasAI para continuar.';
+ $('state').className='state'+(session?' ok':'');
+}
+async function act(callback){
+ if(busy)return;
+ setBusy(true);message();
+ try{await callback();}catch(e){message(e?.message||'Não foi possível concluir. Tente novamente.');}
+ finally{setBusy(false);}
+}
+$('signin').onclick=()=>act(async()=>{
+ const email=$('email').value.trim(),password=$('password').value;
+ if(!email||!password)throw new Error('Informe e-mail e senha do EmbrasAI.');
+ const {error}=await supabase.auth.signInWithPassword({email,password});
+ $('password').value='';
+ if(error)throw new Error('Acesso recusado. Confira o e-mail e a senha.');
+ await refresh();
+});
+$('magic').onclick=()=>act(async()=>{
+ const email=$('email').value.trim();
+ if(!email)throw new Error('Informe o e-mail da sua conta EmbrasAI.');
+ const redirect=new URL(location.href);redirect.hash='';
+ const {error}=await supabase.auth.signInWithOtp({
+  email,options:{shouldCreateUser:false,emailRedirectTo:redirect.href}
+ });
+ if(error)throw new Error('Não foi possível enviar o link. Você também pode entrar com senha.');
+ message('Confira seu e-mail. Abra o link recebido neste mesmo navegador do iPhone.','good');
+});
+$('logout').onclick=()=>act(async()=>{
+ const {error}=await supabase.auth.signOut({scope:'local'});
+ if(error)throw error;
+ session=null;await refresh();
+});
+$('authorize').onclick=()=>act(async()=>{
+ if(accountId!==EXPECTED_CAXIAS||!session?.access_token)throw new Error('Identidade ou conta indisponível.');
+ const response=await fetch(endpoint,{
+  method:'POST',
+  headers:{'content-type':'application/json',authorization:'Bearer '+session.access_token},
+  body:JSON.stringify({action:'launch',intent:'reconnect',connected_account_id:accountId}),
+  redirect:'manual'
+ });
+ const payload=await response.json().catch(()=>null);
+ if(!response.ok||payload?.ok!==true){
+  if(response.status===401)throw new Error('Sessão expirada. Entre novamente na sua conta EmbrasAI.');
+  if(response.status===404)throw new Error('A conta de Caxias não foi encontrada na sua conta EmbrasAI.');
+  throw new Error('A autorização não pôde ser iniciada: '+(payload?.error||'resposta indisponível'));
+ }
+ if(payload?.flow_version!=='account_isolated_v1'||payload?.connected_account_id!==accountId)
+  throw new Error('O servidor não confirmou a conta de Caxias. Nada foi autorizado.');
+ let url;
+ try{url=new URL(String(payload.url));}catch{throw new Error('Endereço retornado pela Meta inválido.');}
+ if(url.protocol!=='https:'||!['www.facebook.com','facebook.com'].includes(url.hostname)
+    ||!/^\/v\d+(?:\.\d+)?\/dialog\/oauth$/.test(url.pathname)
+    ||!url.searchParams.get('state')||!url.searchParams.get('client_id'))
+  throw new Error('Endereço de autorização não validado. Nada foi enviado à Meta.');
+ $('state').textContent='Abrindo a autorização oficial da Meta…';
+ location.assign(url.href);
+});
+refresh().catch(()=>{ $('state').textContent='Não foi possível carregar a sessão.';message('Reabra esta página e tente novamente.'); });
+</script>
+</body>
+</html>

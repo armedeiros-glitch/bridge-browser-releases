@@ -6,7 +6,7 @@
 <meta name="color-scheme" content="dark">
 <title>Conectar EmbrasAI</title>
 <style>
-*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:#0b0d10;color:#f5f7fa;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}.shell{width:min(520px,100%)}.brand{display:flex;align-items:center;gap:10px;margin:0 0 16px 4px;font-weight:800}.mark{width:32px;height:32px;border-radius:10px;border:1px solid #2a3441;background:#141a22;display:grid;place-items:center}.card{background:#12161c;border:1px solid #262d37;border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.38);overflow:hidden}.head{padding:24px 26px 19px;border-bottom:1px solid #232a33}.eyebrow{font-size:11px;color:#7f8b99;font-weight:800;text-transform:uppercase;letter-spacing:.11em}h1{font-size:23px;line-height:1.15;margin:8px 0 7px}.head p,.note{margin:0;color:#9aa5b1;font-size:13px;line-height:1.5}.body{padding:22px 26px 26px}.section{display:none}.section.show{display:block}.device{display:flex;align-items:center;gap:12px;padding:13px;border:1px solid #2d3540;border-radius:12px;background:#0e1217;margin-bottom:17px}.dot{width:9px;height:9px;border-radius:99px;background:#43d17b;box-shadow:0 0 10px rgba(67,209,123,.45)}.device-name{font-size:13px;font-weight:780}.device-meta{font-size:11px;color:#7f8994;margin-top:3px}.scopes{border-top:1px solid #252c35;border-bottom:1px solid #252c35;padding:13px 0;margin:16px 0 19px}.scope{display:flex;gap:9px;padding:6px 0;font-size:13px;color:#c2cbd4}.check{color:#6ee7a2;font-weight:900}.actions{display:flex;gap:10px}.actions button{flex:1;height:42px;border-radius:11px;border:1px solid #303946;background:#1a2028;color:#edf2f7;font-weight:760;cursor:pointer}.actions .allow{background:#0b5f35;border-color:#177747;color:#e6fff1}.actions button:disabled{opacity:.5;cursor:not-allowed}.login-grid{display:grid;gap:11px;margin:17px 0}.field{display:grid;gap:6px}.field label{font-size:12px;color:#9aa5b1;font-weight:700}.field input{width:100%;height:42px;border-radius:10px;border:1px solid #303946;background:#0e1217;color:#f5f7fa;padding:0 12px;font:inherit;outline:none}.field input:focus{border-color:#4b7bec}.login-grid button{height:42px;border-radius:11px;border:1px solid #177747;background:#0b5f35;color:#e6fff1;font-weight:760;cursor:pointer}.login-grid button:disabled{opacity:.5;cursor:not-allowed}.login-help{margin-top:13px!important}.switch{display:block;margin:12px auto 0;border:0;background:transparent;color:#8fa8c7;font:inherit;font-size:12px;cursor:pointer}.switch:hover{color:#c8d7ea}.notice{display:none;margin:0 0 15px;padding:11px 13px;border-radius:10px;font-size:13px;line-height:1.4;border:1px solid #653239;background:#211215;color:#ffb9c0}.notice.show{display:block}#passwordLogin[hidden]{display:none}.login-grid .switch{background:transparent;border:0;color:#8fa8c7;font-weight:500;height:auto;padding:5px}.login-grid .switch:hover{color:#c8d7ea}.login-grid #passwordLogin{display:grid;gap:11px}.notice.good{border-color:#285c43;background:#0f2018;color:#a9ebc8}.spinner{width:28px;height:28px;margin:8px auto 14px;border:3px solid #26303c;border-top-color:#dce5ef;border-radius:50%;animation:s .8s linear infinite}@keyframes s{to{transform:rotate(360deg)}}.center{text-align:center}.foot{text-align:center;color:#626d79;font-size:11px;margin-top:14px}@media(max-width:520px){body{padding:14px}.head,.body{padding-left:20px;padding-right:20px}.actions{flex-direction:column}}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:#0b0d10;color:#f5f7fa;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}.shell{width:min(520px,100%)}.brand{display:flex;align-items:center;gap:10px;margin:0 0 16px 4px;font-weight:800}.mark{width:32px;height:32px;border-radius:10px;border:1px solid #2a3441;background:#141a22;display:grid;place-items:center}.card{background:#12161c;border:1px solid #262d37;border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.38);overflow:hidden}.head{padding:24px 26px 19px;border-bottom:1px solid #232a33}.eyebrow{font-size:11px;color:#7f8b99;font-weight:800;text-transform:uppercase;letter-spacing:.11em}h1{font-size:23px;line-height:1.15;margin:8px 0 7px}.head p,.note{margin:0;color:#9aa5b1;font-size:13px;line-height:1.5}.body{padding:22px 26px 26px}.section{display:none}.section.show{display:block}.device{display:flex;align-items:center;gap:12px;padding:13px;border:1px solid #2d3540;border-radius:12px;background:#0e1217;margin-bottom:17px}.dot{width:9px;height:9px;border-radius:99px;background:#43d17b;box-shadow:0 0 10px rgba(67,209,123,.45)}.device.unlinked .dot{background:#6b7584;box-shadow:none}.device-name{font-size:13px;font-weight:780}.device-meta{font-size:11px;color:#7f8994;margin-top:3px}.scopes{border-top:1px solid #252c35;border-bottom:1px solid #252c35;padding:13px 0;margin:16px 0 19px}.scope{display:flex;gap:9px;padding:6px 0;font-size:13px;color:#c2cbd4}.check{color:#6ee7a2;font-weight:900}.actions{display:flex;gap:10px}.actions button{flex:1;height:42px;border-radius:11px;border:1px solid #303946;background:#1a2028;color:#edf2f7;font-weight:760;cursor:pointer}.actions .allow{background:#0b5f35;border-color:#177747;color:#e6fff1}.actions button:disabled{opacity:.5;cursor:not-allowed}.login-grid{display:grid;gap:11px;margin:17px 0}.field{display:grid;gap:6px}.field label{font-size:12px;color:#9aa5b1;font-weight:700}.field input{width:100%;height:42px;border-radius:10px;border:1px solid #303946;background:#0e1217;color:#f5f7fa;padding:0 12px;font:inherit;outline:none}.field input:focus{border-color:#4b7bec}.login-grid button{height:42px;border-radius:11px;border:1px solid #177747;background:#0b5f35;color:#e6fff1;font-weight:760;cursor:pointer}.login-grid button:disabled{opacity:.5;cursor:not-allowed}.login-help{margin-top:13px!important}.switch{display:block;margin:12px auto 0;border:0;background:transparent;color:#8fa8c7;font:inherit;font-size:12px;cursor:pointer}.switch:hover{color:#c8d7ea}.notice{display:none;margin:0 0 15px;padding:11px 13px;border-radius:10px;font-size:13px;line-height:1.4;border:1px solid #653239;background:#211215;color:#ffb9c0}.notice.show{display:block}#passwordLogin[hidden]{display:none}.login-grid .switch{background:transparent;border:0;color:#8fa8c7;font-weight:500;height:auto;padding:5px}.login-grid .switch:hover{color:#c8d7ea}.login-grid #passwordLogin{display:grid;gap:11px}.login-grid #passwordLogin[hidden]{display:none}#socialLogin[hidden],#socialLogin button[hidden]{display:none}.other-login summary{cursor:pointer;color:#8fa8c7;font-size:12px;text-align:center;list-style-position:inside;padding:12px}.other-login summary:hover{color:#dce5ef}.other-login:not([open]){margin:6px 0}.other-login[open] .login-grid{padding-top:7px}.notice.good{border-color:#285c43;background:#0f2018;color:#a9ebc8}.spinner{width:28px;height:28px;margin:8px auto 14px;border:3px solid #26303c;border-top-color:#dce5ef;border-radius:50%;animation:s .8s linear infinite}@keyframes s{to{transform:rotate(360deg)}}.center{text-align:center}.foot{text-align:center;color:#626d79;font-size:11px;margin-top:14px}@media(max-width:520px){body{padding:14px}.head,.body{padding-left:20px;padding-right:20px}.actions{flex-direction:column}}
 </style>
 </head>
 <body>
@@ -25,7 +25,13 @@
 <button id="switchAccount" class="switch" type="button">Trocar conta</button>
 </section>
 <section id="login" class="section">
-<p class="note">Vamos conectar sua conta EmbrasAI. Sem precisar de senha.</p>
+<p class="note">Conecte sua conta EmbrasAI. Não precisa criar uma senha.</p>
+<div id="socialLogin" class="login-grid" hidden>
+<button id="google" type="button" hidden>Continuar com Google</button>
+<button id="apple" type="button" hidden>Continuar com Apple</button>
+</div>
+<details id="otherLogin" class="other-login" open>
+<summary>Outras formas de entrar</summary>
 <div class="login-grid">
 <div class="field"><label for="email">Seu e-mail</label><input id="email" type="email" autocomplete="username" inputmode="email"></div>
 <button id="magic" type="button">Continuar com e-mail</button>
@@ -35,7 +41,8 @@
 <button id="signIn" type="button">Entrar com senha</button>
 </div>
 </div>
-<p class="note login-help">Na primeira vez, confirme o link recebido no e-mail. Nas próximas conexões deste navegador, sua sessão pode ser reaproveitada.</p>
+</details>
+<p class="note login-help">Se você já está conectado nesta conta, continuará diretamente para a autorização do plugin. Se utilizar outra conta Apple/Google, ela deverá estar vinculada ao seu EmbrasAI.</p>
 </section>
 <section id="needsApp" class="section center"><p class="note">Abra o EmbrasAI e inicie a conexão com sua IA para preparar este navegador automaticamente.</p></section>
 <div class="foot">O token local do navegador não é enviado ao provedor de IA.</div>
@@ -55,12 +62,56 @@ const clearNotice=()=>{$('notice').textContent='';$('notice').classList.remove('
 const fail=(message,section='needsApp')=>{$('notice').textContent=message;$('notice').classList.add('show');show(section);};
 async function session(){const {data}=await supabase.auth.getSession();return data.session;}
 async function account(accessToken){const r=await fetch(ACCOUNT_URL,{headers:{authorization:'Bearer '+accessToken}});if(!r.ok)throw new Error('Não foi possível validar o EmbrasAI.');return r.json();}
+async function configureSocialLogin(){
+  const google=$('google'),apple=$('apple'),wrapper=$('socialLogin'),other=$('otherLogin');
+  google.hidden=true;apple.hidden=true;wrapper.hidden=true;other.open=true;
+  try{
+    const res=await fetch(SUPABASE_URL+'/auth/v1/settings',{headers:{apikey:PUBLISHABLE_KEY},cache:'no-store'});
+    if(!res.ok)throw new Error('auth_provider_settings_unavailable');
+    const {external={}}=await res.json();
+    google.hidden=external.google!==true;
+    apple.hidden=external.apple!==true;
+    wrapper.hidden=google.hidden&&apple.hidden;
+    other.open=wrapper.hidden;
+  }catch(_error){
+    // Fail closed: never offer a social provider not confirmed enabled by Supabase.
+    google.hidden=true;apple.hidden=true;wrapper.hidden=true;other.open=true;
+  }
+}
+function socialReturnUrl(){
+  const target=new URL(location.pathname,location.origin);
+  if(authorizationId)target.searchParams.set('authorization_id',authorizationId);
+  return target.href;
+}
+async function socialSignIn(provider){
+  const b=$(provider);b.disabled=true;clearNotice();
+  try{
+    const {data,error}=await supabase.auth.signInWithOAuth({provider,options:{redirectTo:socialReturnUrl()}});
+    if(error)throw error;
+    if(!data?.url)throw new Error('oauth_redirect_missing');
+    // supabase-js handles the browser redirect; do not navigate a second time.
+  }catch(_error){
+    fail('Não foi possível entrar com '+(provider==='google'?'Google':'Apple')+'. Tente novamente ou escolha outra forma de entrar.','login');
+    b.disabled=false;
+  }
+}
+$('google').onclick=()=>socialSignIn('google');
+$('apple').onclick=()=>socialSignIn('apple');
 async function bootstrap(){
   if(deviceTokenHash){const {error}=await supabase.auth.verifyOtp({token_hash:deviceTokenHash,type:'email'});if(error)throw new Error('A conexão automática expirou. Volte ao EmbrasAI e tente novamente.');history.replaceState(null,'',location.pathname+location.search);}
   const s=await session();
-  if(!s){$('title').textContent='Entrar no EmbrasAI';$('subtitle').textContent='Conecte sua conta para autorizar o ChatGPT.';show('login');return;}
-  const a=await account(s.access_token);if(!a.linked||!Array.isArray(a.devices)||!a.devices.length){await supabase.auth.signOut({ scope: 'local' });$('title').textContent='Entrar no EmbrasAI';$('subtitle').textContent='Use uma conta vinculada a um EmbrasAI.';fail('Esta conta não possui um EmbrasAI vinculado.','login');return;}
-  const d=a.devices.find(x=>x.is_default)||a.devices[0];$('deviceName').textContent=d.display_name||'EmbrasAI';$('deviceMeta').textContent=[d.online?'Online':'Offline',d.app_version?'v'+d.app_version:''].filter(Boolean).join(' · ');
+  if(!s){$('title').textContent='Entrar no EmbrasAI';$('subtitle').textContent='Conecte sua conta para autorizar o ChatGPT.';await configureSocialLogin();show('login');return;}
+  const a=await account(s.access_token);
+  const linked=!!a.linked&&Array.isArray(a.devices)&&a.devices.length>0;
+  const d=linked?(a.devices.find(x=>x.is_default)||a.devices[0]):null;
+  if(d){
+    $('deviceName').textContent=d.display_name||'EmbrasAI';
+    $('deviceMeta').textContent=[d.online?'Online':'Offline',d.app_version?'v'+d.app_version:''].filter(Boolean).join(' · ');
+  }else{
+    $('deviceName').textContent='Nenhum computador vinculado';
+    $('deviceMeta').textContent='Conecte o aplicativo depois. Nenhuma tarefa pode acessar um PC ainda.';
+    document.querySelector('.device').classList.add('unlinked');
+  }
   if(!authorizationId){$('title').textContent='Conexão não iniciada';$('subtitle').textContent='Volte à sua IA e inicie a conexão com o EmbrasAI.';show('needsApp');return;}
   const {data,error}=await supabase.auth.oauth.getAuthorizationDetails(authorizationId);if(error)throw error;if(data&&!('authorization_id' in data)&&data.redirect_url){location.assign(data.redirect_url);return;}
   const clientName=data?.client?.name||'Sua IA';

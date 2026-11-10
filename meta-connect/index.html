@@ -11,21 +11,33 @@
     .head{padding:27px 28px 21px;border-bottom:1px solid #252c34}.eyebrow{font-size:11px;color:#7f8b97;text-transform:uppercase;font-weight:800;letter-spacing:.12em}.head h1{font-size:27px;margin:8px 0 7px;letter-spacing:-.04em}.head p{margin:0;color:#9aa5af;font-size:14px;line-height:1.5}.body{padding:24px 28px 28px}
     .notice{display:none;padding:12px 13px;border-radius:11px;margin-bottom:15px;font-size:13px;line-height:1.45;border:1px solid #3b4551;background:#151b21;color:#cbd3db}.notice.show{display:block}.notice.error{border-color:#6d343b;background:#241216;color:#ffc0c6}.session{font-size:12px;color:#7f8b97;margin-bottom:17px}.ok{color:#75d99e;font-weight:800}
     .simple{padding:14px 15px;border:1px solid #29313a;border-radius:12px;background:#0e1216;color:#aeb8c2;font-size:13px;line-height:1.55;margin-bottom:17px}.simple strong{color:#eef2f6}
-    button{width:100%;height:48px;border:0;border-radius:12px;background:#1877f2;color:#fff;font:inherit;font-weight:850;cursor:pointer;box-shadow:0 8px 24px rgba(24,119,242,.2)}button:hover{filter:brightness(1.06)}button:disabled{opacity:.45;cursor:not-allowed}.hint{margin:14px 0 0;color:#717c87;font-size:11px;line-height:1.5;text-align:center}.fieldLabel{display:block;color:#cbd3db;font-size:13px;font-weight:700;margin:0 0 8px}select{width:100%;min-height:46px;border:1px solid #3b4551;border-radius:12px;background:#0e1216;color:#eef2f6;padding:0 12px;margin:0 0 15px;font:inherit}select:disabled{opacity:.6}
+    button{width:100%;height:48px;border:0;border-radius:12px;background:#1877f2;color:#fff;font:inherit;font-weight:850;cursor:pointer;box-shadow:0 8px 24px rgba(24,119,242,.2)}button:hover{filter:brightness(1.06)}button:disabled{opacity:.45;cursor:not-allowed}.hint{margin:14px 0 0;color:#717c87;font-size:11px;line-height:1.5;text-align:center}.fieldLabel{display:block;color:#cbd3db;font-size:13px;font-weight:700;margin:0 0 8px}select,input{width:100%;min-height:46px;border:1px solid #3b4551;border-radius:12px;background:#0e1216;color:#eef2f6;padding:0 12px;margin:0 0 15px;font:inherit}select:disabled,input:disabled{opacity:.6}[hidden]{display:none!important}.helper{font-size:12px;color:#93a2b1;margin:-5px 0 15px;line-height:1.5}
   </style>
 </head>
 <body>
   <main class="shell">
     <div class="brand">EmbrasAI</div>
     <section class="card">
-      <header class="head"><div class="eyebrow">Performance Brain</div><h1>Reconectar Meta</h1><p>Escolha uma conta já vinculada e renove o acesso pelo Facebook.</p></header>
+      <header class="head"><div class="eyebrow">Performance Brain</div><h1>Conectar Meta</h1><p>Adicione uma conta nova ou renove o acesso de uma conta existente.</p></header>
       <div class="body">
         <div id="notice" class="notice"></div>
         <div id="session" class="session">Verificando sua sessão…</div>
-        <div class="simple"><strong>Uma conta por vez, sem duplicação.</strong><br>O Facebook abrirá a autorização oficial. Nenhuma campanha será alterada nesta etapa.</div>
-        <label class="fieldLabel" for="account">Conta Meta vinculada</label>
-        <select id="account" disabled><option value="">Carregando contas…</option></select>
-        <button id="connect" disabled>Reconectar com Facebook</button>
+        <div class="simple"><strong>Sem duplicar contas.</strong><br>O Facebook vai confirmar a conta selecionada. Nenhum anúncio será alterado.</div>
+        <label class="fieldLabel" for="mode">O que deseja fazer?</label>
+        <select id="mode">
+          <option value="reconnect">Reconectar uma conta existente</option>
+          <option value="connect">Adicionar uma conta nova</option>
+        </select>
+        <div id="existingWrap">
+          <label class="fieldLabel" for="account">Conta Meta vinculada</label>
+          <select id="account" disabled><option value="">Carregando contas…</option></select>
+        </div>
+        <div id="newWrap" hidden>
+          <label class="fieldLabel" for="newAccount">Número da conta de anúncios</label>
+          <input id="newAccount" type="text" inputmode="numeric" autocomplete="off" placeholder="Ex.: 1785747172707200" maxlength="32">
+          <p class="helper">Use o número da conta aberta no Gerenciador de Anúncios, sem alterar o Business Manager. A Meta confirmará seu acesso.</p>
+        </div>
+        <button id="connect" disabled>Continuar com Facebook</button>
         <p class="hint">O EmbrasAI guarda a credencial no Vault. Nenhuma campanha é alterada durante a conexão.</p>
       </div>
     </section>
@@ -40,9 +52,29 @@
   const sessionLine = document.getElementById('session');
   const connect = document.getElementById('connect');
   const account = document.getElementById('account');
+  const mode = document.getElementById('mode');
+  const newAccount = document.getElementById('newAccount');
+  const existingWrap = document.getElementById('existingWrap');
+  const newWrap = document.getElementById('newWrap');
+  const requestedAccount = new URL(location.href).searchParams.get('ad_account') || '';
+  if (/^[0-9]{1,32}$/.test(requestedAccount)) {
+    mode.value = 'connect';
+    newAccount.value = requestedAccount;
+  }
   let session = null;
   function show(message, kind='') { notice.textContent = message || ''; notice.className = 'notice' + (message ? ' show' : '') + (kind ? ' ' + kind : ''); }
-  function busy(on) { connect.disabled = on || !session?.access_token || !account.value; connect.textContent = on ? 'Abrindo Facebook…' : 'Reconectar com Facebook'; }
+  function busy(on) {
+    const adding = mode.value === 'connect';
+    const validAccount = adding ? /^[0-9]{1,32}$/.test(newAccount.value.trim()) : Boolean(account.value);
+    connect.disabled = on || !session?.access_token || !validAccount;
+    connect.textContent = on ? 'Abrindo Facebook…' : adding ? 'Adicionar com Facebook' : 'Reconectar com Facebook';
+  }
+  function renderMode() {
+    const adding = mode.value === 'connect';
+    existingWrap.hidden = adding;
+    newWrap.hidden = !adding;
+    busy(false);
+  }
   async function bootstrap() {
     const { data } = await supabase.auth.getSession();
     session = data.session;
@@ -73,13 +105,17 @@
       account.replaceChildren(new Option('Contas indisponíveis', ''));
       show(error?.message || 'Erro ao consultar contas Meta.', 'error');
     }
-    busy(false);
+    renderMode();
   }
+  mode.addEventListener('change', renderMode);
   account.addEventListener('change', () => busy(false));
+  newAccount.addEventListener('input', () => busy(false));
   connect.addEventListener('click', async () => {
     busy(true); show('');
     try {
-      const response = await fetch(OAUTH_URL, { method:'POST', headers:{ 'content-type':'application/json', 'authorization':'Bearer ' + session.access_token }, body:JSON.stringify({ action:'launch', intent:'reconnect', connected_account_id:account.value }) });
+      const response = await fetch(OAUTH_URL, { method:'POST', headers:{ 'content-type':'application/json', 'authorization':'Bearer ' + session.access_token }, body:JSON.stringify(mode.value === 'connect'
+        ? { action:'launch', intent:'connect', provider_account_id:newAccount.value.trim() }
+        : { action:'launch', intent:'reconnect', connected_account_id:account.value }) });
       const result = await response.json().catch(() => ({}));
       if (!response.ok || !result?.url) throw new Error(result?.error || 'Não consegui iniciar o login da Meta.');
       location.assign(result.url);
